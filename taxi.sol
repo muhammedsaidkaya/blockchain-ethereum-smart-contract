@@ -68,7 +68,7 @@ contract TaxiInvestmentContract{
         _;
     }
     modifier isParticipationFeeEnough(){
-        require(msg.value == 100 ether);
+        require(msg.value == 90 ether);
         _;
     }
     modifier isManager(){
@@ -80,7 +80,7 @@ contract TaxiInvestmentContract{
         _;
     }
     modifier isParticipant(){
-        require(msg.sender == participants[msg.sender].investor);
+        require(msg.sender == participants[msg.sender].investor,"You are not participant.");
         _;
     }
     modifier isTaxiDriver(){
@@ -100,7 +100,7 @@ contract TaxiInvestmentContract{
         _;
     }
     modifier isEnoughMoneyForPurchaseCar(CarPurchasingProposal memory proposal){
-        require(proposal.proposedCar.car.price == msg.value);
+        require(proposal.proposedCar.car.price <= address(this).balance);
         _;
     }
     modifier isEnoughYesVoteForPurchaseCar(CarPurchasingProposal memory proposal){
@@ -135,7 +135,7 @@ contract TaxiInvestmentContract{
     function incrementYesVoteCount(CarPurchasingProposal memory proposal) private pure {
         proposal.approvalNumber += 1;
     }
-    function creteaCarPurchasinProposal(uint32 _carID,uint _price,uint32 _offerValidTime) private pure returns(CarPurchasingProposal memory){
+    function creteaCarPurchasingProposal(uint32 _carID,uint _price,uint32 _offerValidTime) private pure returns(CarPurchasingProposal memory){
         return CarPurchasingProposal({
             proposedCar: ProposedCar({
                 car: Car({
@@ -185,10 +185,10 @@ contract TaxiInvestmentContract{
     
     //Proposes
     function carProposeToBusiness(uint32 _carID,uint _price,uint32 _offerValidTime) public isCarDealer{
-        purchaseProposal = creteaCarPurchasinProposal(_carID,_price,_offerValidTime);
+        purchaseProposal = creteaCarPurchasingProposal(_carID,_price,_offerValidTime);
     }
     function rePurchaseCarPropose(uint32 _carID,uint _price,uint32 _offerValidTime) public isCarDealer{
-        rePurchaseProposal = creteaCarPurchasinProposal(_carID,_price,_offerValidTime);
+        rePurchaseProposal = creteaCarPurchasingProposal(_carID,_price,_offerValidTime);
     }
     function proposeDriver(address payable _taxiDriver, uint _price) public isManager{
         taxiDriverProposal = DriverProposal({
@@ -219,7 +219,7 @@ contract TaxiInvestmentContract{
     
     
     //Payables
-    function purchaseCar() payable public isEnoughMoneyForPurchaseCar(purchaseProposal) isEnoughYesVoteForPurchaseCar(purchaseProposal) isManager{
+    function purchaseCar() public isEnoughMoneyForPurchaseCar(purchaseProposal) isEnoughYesVoteForPurchaseCar(purchaseProposal) isManager{
         Car memory temp = purchaseProposal.proposedCar.car;
         carDealer.addr.transfer(temp.price);
         ownedCar = temp.carID;
@@ -229,11 +229,11 @@ contract TaxiInvestmentContract{
         ownedCar = 0;
         delete rePurchaseProposal;
     }
-    function fireDriver() public {
+    function payTaxiCharge() public payable isGreaterThanZero(msg.value){}
+    function fireDriver() public isManager {
         taxiDriver.driver.transfer(taxiDriver.salary);
         delete taxiDriver;
     }
-    function payTaxiCharge() public payable isGreaterThanZero(msg.value){}
     function releaseSalary() public isManager isOneMonthPassedAfterDriversLastPayment{
         taxiDriver.balance += taxiDriver.salary;
         taxiDriver.lastPayment = uint(now);
