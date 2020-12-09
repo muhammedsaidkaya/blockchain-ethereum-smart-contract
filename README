@@ -13,6 +13,8 @@ among participants every month. However, one problem is that they have no trust 
 
 The problem was solved by a smart contract with struct structure suitable for object oriented programming.Lots of modifiers used for authorization and validation mechanisms. 
 
+Solidity : 0.6.11
+
 <------------Structs-------------->
 Participant : Person involved in taxi purchases and sales.
 	- This model includes below variables.

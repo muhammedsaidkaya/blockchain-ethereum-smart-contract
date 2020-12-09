@@ -68,7 +68,7 @@ contract TaxiInvestmentContract{
         _;
     }
     modifier isParticipationFeeEnough(){
-        require(msg.value == 90 ether);
+        require(msg.value == 100 ether);
         _;
     }
     modifier isManager(){
