@@ -165,6 +165,7 @@ contract TaxiInvestmentContract{
     }
     function setDriver() public isRightAddress(manager,"This function called by manager.") isEnougYesVoteForProposal(taxiDriverProposal.proposal){
         taxiDriver = taxiDriverProposal.proposedTaxiDriver;
+        delete taxiDriverProposal;
     }
     
     
